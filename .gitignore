@@ -2,6 +2,7 @@
 /client/dist
 .coveralls.yml
 /coverage
+/server/data.csv
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
