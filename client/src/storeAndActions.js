@@ -1,6 +1,5 @@
 import createStore from 'unistore';
 
-const BASE_URL = 'http://fec-reviews-dev.us-west-2.elasticbeanstalk.com';
 const PRODUCT_ID = window.location.href.split('/')[
   window.location.href.split('/').length - 1
 ];
@@ -23,7 +22,7 @@ const setInitialState = () => {
       ),
     );
   }
-  fetch(`${BASE_URL}/reviews/${PRODUCT_ID}`)
+  fetch(`/reviews/${PRODUCT_ID}`)
     .then(response => response.json())
     .then(json => {
       const ratings = json.reduce((currentRatings, review) => {
@@ -45,7 +44,7 @@ const setInitialState = () => {
 };
 
 const updateDB = payload => {
-  fetch(`${BASE_URL}/reviews/${PRODUCT_ID}`, {
+  fetch(`/reviews/${PRODUCT_ID}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -65,6 +64,22 @@ const actions = () => ({
       reviews[targetId].modifiedKeys[value] = true;
       reviews[targetId][value] += 1;
       store.setState({ reviews, updateCounter: updateCounter + 1 });
+      localStorage.setItem(
+        `trailblazersProduct${PRODUCT_ID}Reviews`,
+        JSON.stringify(store.getState()),
+      );
+    }
+  },
+  decrementValue: ({ reviews, updateCounter }, targetId, value) => {
+    if (!reviews[targetId].modifiedKeys[value]) {
+      updateDB({
+        reviewId: targetId,
+        updatedCol: value,
+        newValue: reviews[targetId][value] - 1,
+      });
+      reviews[targetId].modifiedKeys[value] = true;
+      reviews[targetId][value] -= 1;
+      store.setState({ reviews, updateCounter: updateCounter - 1 });
       localStorage.setItem(
         `trailblazersProduct${PRODUCT_ID}Reviews`,
         JSON.stringify(store.getState()),
